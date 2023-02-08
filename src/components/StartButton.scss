@@ -1,0 +1,26 @@
+@import '../scss/mixins.scss';
+
+$btn-bg: #ee3322;
+
+button.start-game {
+  @include zap-button($btn-bg);
+  margin: 0.5vh auto;
+  width: 10vh;
+  height: 10vh;
+  border-radius: 50%;
+}
+button.start-game {
+  border-radius: 50%;
+  display: flex;
+  float: left;
+  span {
+    border-radius: 50%;
+    display:block;
+    line-height:8vh;
+    width: 8vh;
+    height: 8vh;
+    margin: auto;
+    background: $btn-bg;
+    text-align: center;
+  }
+}

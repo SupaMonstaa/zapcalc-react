@@ -1,0 +1,26 @@
+@import '../scss/mixins.scss';
+
+$button-color: rgb(35, 111, 197);
+$button-correct: rgb(102, 187, 69);
+$button-wrong: rgb(230, 71, 71);
+button {
+  @include zap-button($button-color);
+  &.even {
+    background-color:lighten($button-color, 15);
+  }
+  &.correct.show {
+    background-color: $button-correct;
+  }
+  &.wrong.show {
+    background-color: $button-wrong;
+  }
+
+  &.correct:active, &.correct.active {
+    background-color: $button-correct;
+    box-shadow: 0 1px 0 0 darken($button-correct, 20);
+  }
+  &.wrong:active, &.wrong.active {
+    background-color: $button-wrong;
+    box-shadow: 0 1px 0 0 darken($button-wrong, 20);
+  }
+}

@@ -1,0 +1,14 @@
+.label span {
+     display: block;
+     margin-top: 1px;
+     font-size: 160%;
+     font-weight: bold;
+ }
+
+.label:last-of-type span {
+     display: block;
+     text-align: center;
+     font-size: 85%;
+     width: 28px;
+     padding: 1% 16% 0;
+ }

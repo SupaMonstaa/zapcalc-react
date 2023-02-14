@@ -1,4 +1,4 @@
-import OperationKind from "@/types/OperationKind"
+import OperationKind from "../types/OperationKind"
 import { SwitchInput } from "./SwitchInput"
 import "./OperationSelect.scss"
 

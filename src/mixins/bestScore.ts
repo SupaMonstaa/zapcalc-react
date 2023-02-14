@@ -1,5 +1,5 @@
-import OperationKind from '@/types/OperationKind'
-import Score from "@/types/Score"
+import OperationKind from '../types/OperationKind'
+import Score from "../types/Score"
 
 export default function addScore (
   opK: OperationKind,

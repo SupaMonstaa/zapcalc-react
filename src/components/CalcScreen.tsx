@@ -6,7 +6,7 @@ import starImage7 from '../assets/images/star7.png'
 import pixelate from '../mixins/pixelate';
 import OperationFactory from '../mixins/OperationFactory';
 import './CalcScreen.scss';
-import Operation from '@/types/Operation';
+import Operation from '../types/Operation';
 
 type CalcScreenProps = {
   gameStarted: boolean,

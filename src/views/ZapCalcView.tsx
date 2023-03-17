@@ -21,7 +21,7 @@ type ZapCalcViewProps = {
 export const ZapCalcView:FunctionComponent<ZapCalcViewProps> = ({
   onChange
 }) => {
-  const gameDuration = 5
+  const gameDuration = 120
   
   const [searchParams, setSearchParams] = useSearchParams();
   const qsSeed:string = searchParams.get('seed') || Date.now().toString()

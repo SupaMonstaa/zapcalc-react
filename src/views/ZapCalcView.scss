@@ -40,29 +40,35 @@ $calc-bg: #555555;
   header {
     flex: 0 0 auto;
     height: 9vh;
-    padding-bottom: 3vh;
+    padding: 2vh 0;
     menu {
       margin: 0;
       padding: 0;
       box-sizing:border-box;
       height:100%;
       display:flex;
+      align-items:center;
       
+      .operation-select,
       .level-select {
+        flex:3;
         display:block;
         box-sizing:border-box;
-        float:left;
-        width: 40%;
-        height: 95%;
-        padding: 2% 1vh 0 1vh;
+        padding: 0 0.5vw;
       }
       .operation-select {
-        display:block;
-        box-sizing:border-box;
-        float:left;
-        width:40%;
-        height:95%;
-        padding: 2% 1vh 0 1vh;
+        flex:4;
+      }
+     
+      .start-game {
+        flex:0 0 10vh;
+        margin: 0.5vh;
+        height: 10vh;
+      }
+      .share-button {
+        flex:0 0 4vh;
+        margin: 0 0.5vh;
+        height: 4vh;
       }
     }
   }
@@ -70,11 +76,10 @@ $calc-bg: #555555;
   .calc-screen {
     flex: 0 0 auto;
     margin-bottom: 2vh;
-    height: 17vh;
+    height: 18vh;
   }
 
   .keyboard-container {
-    height: 63%;
     flex: 1 1 auto;
   }
 }

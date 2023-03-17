@@ -1,0 +1,14 @@
+@import '../scss/mixins.scss';
+
+$btn-bg: #ee3322;
+
+button.share-button {
+  @include zap-button($btn-bg);
+  border-radius: 50%;
+  svg {
+    padding-top: 6px;
+    padding-right: 2px;
+    height: 60%;
+    width: 60%;
+  }
+}

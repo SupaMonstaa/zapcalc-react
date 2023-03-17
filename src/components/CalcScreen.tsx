@@ -9,15 +9,15 @@ import './CalcScreen.scss';
 import Operation from '../types/Operation';
 
 type CalcScreenProps = {
+  scoreToBeat:number,
   gameStarted: boolean,
   gameDuration: number,
   totalScore: number,
   newBestScoreMessage: string,
   score: number,
-  stars: number,
   level: number,
   operationKind: OperationKind,
-  operation: Operation
+  operation?: Operation
 }
 type CalcScreenState = {
   loadingStarsCount: number
@@ -46,7 +46,6 @@ export class CalcScreen extends Component<CalcScreenProps, CalcScreenState> {
   }
 
   componentDidUpdate(prevProps: CalcScreenProps) {
-    console.log('componentDidUpdate renderScreen')
     this.renderScreen()
   }
 
@@ -75,6 +74,7 @@ export class CalcScreen extends Component<CalcScreenProps, CalcScreenState> {
   }
 
   renderScreen(): void {
+    // wait till the star images are loaded
     if (this.state.loadingStarsCount > 0) return
     this.clearScreen()
     if (this.props.score === -1 && !this.props.gameStarted) {
@@ -118,7 +118,12 @@ export class CalcScreen extends Component<CalcScreenProps, CalcScreenState> {
       this.drawImage(this.starImage7, 25 + 8 * i, 15)
     }
     if (frame % 2) {
-      this.drawText('START^', 69, 4, false, '#ff0000')
+      this.drawText('PRESS', 69, 4, false, '#ff0000')
+      this.drawText('START', 69, 16, false, '#ff0000')
+    }
+    if (this.props.scoreToBeat >= 0) {
+      this.drawText('CHALLENGE !', 1, 1, false, '#ff0000')
+      this.drawText(`Score to beat: ${this.props.scoreToBeat}`, 1, 10, false, '#ff0000')
     }
     this.pixelate()
   }
@@ -161,6 +166,9 @@ export class CalcScreen extends Component<CalcScreenProps, CalcScreenState> {
   }
 
   private drawOperation(): void {
+    if (!this.props.operation) {
+      return
+    }
     const X = 11
     const Y = 5
     // const txtH = 103.2;
@@ -181,7 +189,7 @@ export class CalcScreen extends Component<CalcScreenProps, CalcScreenState> {
     this.drawText(`${this.props.operation.sign} `, textIndex, Y - 1, true, this.props.operation.color)
     textIndex += spaceW + 13
     this.drawText(`${this.props.operation.digit2}`, textIndex, Y, true, this.props.operation.color)
-    for (let i = 0; i < this.props.stars; i += 1) {
+    for (let i = 0; i < this.props.operation.stars; i += 1) {
       this.drawImage(this.starImage7, 2, 19 - i * 8)
     }
   }

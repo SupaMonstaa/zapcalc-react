@@ -1,4 +1,4 @@
-import { ChangeEvent, FunctionComponent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, FunctionComponent, useCallback, useState } from "react";
 import "./SwitchInput.scss"
 
 type SwitchInputProps = {
@@ -22,7 +22,6 @@ export const SwitchInput:FunctionComponent<SwitchInputProps> = (
     // increment id to create unique component Id
     componentId += 1
     const id = `switch-input-${componentId}`
-    const inputRef = useRef<HTMLInputElement>(null)
 
     // adjust cursor width to the number of inputs
     let cIndex = 0
@@ -34,7 +33,7 @@ export const SwitchInput:FunctionComponent<SwitchInputProps> = (
     }
     const [cursorIndex, setCursorIndex] = useState(cIndex);
 
-    function onCursorChange(e:ChangeEvent<HTMLInputElement>): void {
+    const onCursorChange = (e:ChangeEvent<HTMLInputElement>): void => {
         const newValue = parseInt(e.target.value)
         if (newValue !== cursorIndex) {
             moveIndicator(parseInt(e.target.value))
@@ -43,18 +42,17 @@ export const SwitchInput:FunctionComponent<SwitchInputProps> = (
     /**
      * move the indicator to the label of the given input
      */
-    function moveIndicator(cIndex: number): void {
+    const moveIndicator = (cIndex: number): void => {
         setCursorIndex(cIndex)
         onChange(switchData[cIndex].value)
     }
 
-    useEffect(() => {
+    const inputRef = useCallback((node:HTMLInputElement) => {
         const percent = 100 - 100 / switchData.length
-        if (inputRef.current) {
-            inputRef.current.style.width = `calc(${percent}% + 4vh)`
-            moveIndicator(cursorIndex)
+        if (node !== null) {
+            node.style.width = `calc(${percent}% + 4vh)`
         }
-    }, [])
+    }, [switchData])
     return (
         <div className="switch">
             <input ref={inputRef} value={cursorIndex} onChange={onCursorChange} type="range" id={id} name={id}

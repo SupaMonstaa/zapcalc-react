@@ -1,173 +1,206 @@
-import React from "react"
-import addScore from "../mixins/bestScore";
-import OperationFactory from "../mixins/OperationFactory";
-import Operation from "../types/Operation"
-import OperationKind from "../types/OperationKind"
-import { CalcScreen } from "../components/CalcScreen"
-import { Keyboard } from "../components/Keyboard";
-import { StartButton } from "../components/StartButton";
-import { OperationSelect } from "../components/OperationSelect";
-import { LevelSelect } from "../components/LevelSelect";
+import { FunctionComponent, useCallback, useEffect, useState } from "react"
+import { useSearchParams } from 'react-router-dom'
+import addScore from "@/mixins/bestScore";
+import OperationFactory from "@/mixins/OperationFactory";
+import Operation from "@/types/Operation"
+import OperationKind from "@/types/OperationKind"
+import { CalcScreen } from "@/components/CalcScreen"
+import { Keyboard } from "@/components/Keyboard";
+import { StartButton } from "@/components/StartButton";
+import { OperationSelect } from "@/components/OperationSelect";
+import { LevelSelect } from "@/components/LevelSelect";
+import { ShareButton } from "@/components/ShareButton";
 import "./ZapCalcView.scss"
 
-type ZapCalcViewState = {
-  operation: Operation,
-  gameTimeLeft: number,
-  shake: boolean,
-  gameStarted: boolean
+let gameTimeout: ReturnType<typeof setTimeout> | undefined
+let nextOperation = true
+
+type ZapCalcViewProps = {
+  onChange:(level:number, operationKind:OperationKind, score:number, seed: string) => void
 }
+export const ZapCalcView:FunctionComponent<ZapCalcViewProps> = ({
+  onChange
+}) => {
+  const gameDuration = 5
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  const qsSeed:string = searchParams.get('seed') || Date.now().toString()
+  // score to beat indicates we are in challenge mode if > 0
+  const qsScoreToBeat:number =
+    searchParams.get('operation') &&
+    searchParams.get('level') &&
+    searchParams.get('seed') &&
+    searchParams.get('score') ?
+    parseInt(searchParams.get('score') as string) : -1;
+  const qsOperationKind = (searchParams.get('operation') || 
+    localStorage.getItem('operationKind') ||
+    OperationKind.mix
+  ) as OperationKind
+  const qsLevel = parseInt(searchParams.get('level') ||
+    localStorage.getItem('level') ||
+    "2")
 
-class ZapCalcView extends React.Component<{}, ZapCalcViewState> {
-  private level!: number
-  private showResult = false
-  private operationKind!: OperationKind
-  private totalScore = -1
-  private nextOperation = true
-  private gameDuration = 5
-  private score = -1
-  private static gameTimeout: ReturnType<typeof setTimeout> | undefined
-  private newBestScoreMessage = ''
-  private stars = 0
+  const [scoreToBeat, setScoreToBeat] = useState(qsScoreToBeat)
+  const [totalScore, setTotalScore] = useState(-1)
+  const [score, setScore] = useState(-1)
+  const [operation, setOperation] = useState<Operation>()
+  const [operationKind, setOperationKind] = useState<OperationKind>(qsOperationKind)
+  const [level, setLevel] = useState(qsLevel);
+  const [gameTimeLeft, setGameTimeLeft] = useState(-1);
+  const [shake, setShake] = useState(false)
+  const [gameStarted, setGameStarted] = useState(false)
+  const [showResult, setShowResult] = useState(false)
+  const [seed, setSeed] = useState(qsSeed)
+  const [newBestScoreMessage, setNewBestScoreMessage] = useState('')
 
-  constructor(props: {}) {
-    super(props)
-    const op = OperationFactory.getOperationClass(this.operationKind, this.level)
-    this.state = {
-      operation: op,
-      gameTimeLeft: -1,
-      shake: false,
-      gameStarted: false
+  // destroy timeout on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeout(gameTimeout);
     }
-    const LSlevel = localStorage.getItem('level')
-    this.level = LSlevel ? parseInt(LSlevel, 0) : 2
-    this.operationKind = localStorage.getItem('operationKind')
-      ? localStorage.getItem('operationKind') as OperationKind : OperationKind.mix
-    this.onLevelChange = this.onLevelChange.bind(this);
-    this.onOperationChange = this.onOperationChange.bind(this);
-    this.startGame = this.startGame.bind(this);
-    this.gameTick = this.gameTick.bind(this)
-    this.onKeyboardValue = this.onKeyboardValue.bind(this);
-  }
-  componentWillUnmount() {
-    clearTimeout(ZapCalcView.gameTimeout);
-  }
-  render() {
-    const calcScreen = <CalcScreen
-      operation={this.state.operation}
-      gameStarted={this.state.gameStarted}
-      gameDuration={this.gameDuration}
-      totalScore={this.totalScore}
-      newBestScoreMessage={this.newBestScoreMessage}
-      stars={this.stars}
-      score={this.score}
-      level={this.level}
-      operationKind={this.operationKind}
-    ></CalcScreen>
-
-    return (
-      <div className={`zap-calc ${this.state.shake && "shake"}`}>
-        <header>
-          <menu>
-            <OperationSelect initValue={this.operationKind} onChange={this.onOperationChange} />
-            <LevelSelect initValue={this.level ? this.level : 0} onChange={this.onLevelChange} />
-            <StartButton gameTimeLeft={this.state.gameTimeLeft} gameDuration={this.gameDuration} onStart={this.startGame} />
-          </menu>
-        </header>
-        {calcScreen}
-        <div className="keyboard-container">
-          <Keyboard
-            showResult={this.showResult}
-            result={this.state.operation.result}
-            onKeyboardClick={this.onKeyboardValue} />
-        </div>
-      </div>
-    );
-  }
-  onKeyboardValue(value: number): void {
-    if (!this.state.gameStarted) {
-      return
-    }
-    if (this.state.operation.result === value) {
-      // correct answer
-      this.nextOperation = true
-      this.score += this.stars
-    } else {
-      // wrong answer, shake !
-      this.setState({ shake: true })
-      setTimeout(() => {
-        this.setState({ shake: false })
-      }, 1000)
-      if (!this.nextOperation) {
-        this.showResult = true
-        this.stars = 0
-      } else {
-        this.nextOperation = false
-      }
-    }
-    if (this.nextOperation) {
-      this.showResult = false
-      this.currentOperation = OperationFactory.getOperationClass(this.operationKind, this.level)
-    }
-  }
-
-  private get currentOperation(): Operation {
-    return this.state.operation
-  }
-
-  private set currentOperation(v: Operation) {
-    this.stars = v.stars
-    this.setState({ operation: v })
-  }
-
-  private startGame(): void {
-    this.score = 0
-    this.showResult = false
-    this.totalScore = -1
-    this.setState({ gameStarted: true, gameTimeLeft: this.gameDuration })
-    this.currentOperation = OperationFactory.getOperationClass(this.operationKind, this.level)
-    clearTimeout(ZapCalcView.gameTimeout)
-    ZapCalcView.gameTimeout = setTimeout(this.gameTick, 1000)
-  }
-
-  private gameTick(): void {
-    this.setState(
-      (prevState) => {
-        return { gameTimeLeft: prevState.gameTimeLeft - 1 }
+  }, [])
+  
+  useEffect(() => {
+    console.log('use effect', level, operationKind, totalScore, seed)
+    onChange(level, operationKind, totalScore, seed)
+    
+    setSearchParams({
+        level:level.toString(),
+        operation: operationKind,
+        score: totalScore.toString(),
+        seed:seed
       }
     )
-  }
-  componentDidUpdate() {
-    if (this.state.gameTimeLeft === 0) {
-      this.endGame()
+  }, [setSearchParams, onChange, level, operationKind, totalScore, seed])
+
+  const onKeyboardValue = (value: number): void => {
+    console.log("nextOperation", nextOperation)
+    if (!gameStarted || !operation) {
+      return
+    }
+    if (operation.result === value) {
+      // correct answer
+      // if show result is set to true, add no score
+      setScore(score + (showResult ? 0 : operation.stars))
+      nextOperation = true
     } else {
-      clearTimeout(ZapCalcView.gameTimeout)
-      ZapCalcView.gameTimeout = setTimeout(this.gameTick, 1000)
+      // wrong answer, shake !
+      setShake(true)
+      setTimeout(() => {
+        setShake(false)
+      }, 1000)
+      if (!nextOperation) {
+        // display the right answer, and set stars to 0
+        setShowResult(true)
+      } else {
+        // first error, keep same operation
+        nextOperation = false
+      }
+    }
+    if (nextOperation) {
+      setShowResult(false)
+      renewOperation()
     }
   }
 
-  private endGame(): void {
-    this.setState({ gameStarted: false, gameTimeLeft: -1 })
-    this.stars = 0
+  const renewOperation = () => {
+    const op = OperationFactory.getOperationClass(operationKind, level)
+    setOperation(op)
+  }
+
+  const startGame = () => {
+    // start a new game with a new seed if second try or restart a on going game
+    const s =  scoreToBeat >= 0 && !gameStarted ? seed : Date.now().toString()  
+    setScoreToBeat(-1)
+    setSeed(s)
+    Operation.seed = s
+    setScore(0)
+    setShowResult(false)
+    setTotalScore(-1)
+    setGameStarted(true)
+    setGameTimeLeft(gameDuration)
+    renewOperation()
+    clearTimeout(gameTimeout)
+    gameTimeout = setTimeout(gameTick, 1000)
+  }
+
+  const gameTick = useCallback(() => {
+    console.log("gameTick")
+    if (gameStarted) {
+      setGameTimeLeft(gameTimeLeft - 1)
+    }
+  }, [setGameTimeLeft, gameStarted,  gameTimeLeft])
+
+  const endGame = useCallback(() => {
+    setGameStarted(false)
+    setGameTimeLeft(-1 )
     // send totalScore to screen
-    this.totalScore = this.score
-    const [rank] = addScore(this.operationKind, this.level, this.totalScore)
-    if (rank >= 0) {
-      // best score !
-      this.newBestScoreMessage = `#${rank + 1}`
+    setTotalScore(score)
+    const [rank] = addScore(operationKind, level, totalScore)
+    // best score !
+    setNewBestScoreMessage((rank >= 0) ? `#${rank + 1}` : '')
+    if (scoreToBeat>0) {
+      if (totalScore > scoreToBeat) {
+        console.log('win')
+      } else if (totalScore === scoreToBeat) {
+        console.log("draw")
+      } else {
+        console.log("lose")
+      }
     } else {
-      this.newBestScoreMessage = ''
+      console.log('no game');
     }
-  }
+  }, [level, operationKind, totalScore, scoreToBeat, score])
 
-  onLevelChange(level: number): void {
+  useEffect(() => {
+    if (gameTimeLeft === 0) {
+      endGame()
+    } else if (gameTimeLeft > 0){
+      clearTimeout(gameTimeout)
+      gameTimeout = setTimeout(gameTick, 1000)
+    }
+  }, [gameTimeLeft, endGame, gameTick, setSearchParams])
+
+  const onLevelChange = (level: number) =>  {
     localStorage.setItem('level', `${level}`)
-    this.level = level
+    setLevel(level)
   }
 
-  onOperationChange(operationKind: OperationKind): void {
+  const onOperationChange = (operationKind: OperationKind) => {
     localStorage.setItem('operationKind', operationKind)
-    this.operationKind = operationKind
+    setOperationKind(operationKind)
   }
-}
 
-export default ZapCalcView;
+  return (
+    <div className={`zap-calc ${shake && "shake"}`}>
+      <header>
+        <menu>
+          <OperationSelect initValue={operationKind} onChange={onOperationChange} />
+          <LevelSelect initValue={level ? level : 0} onChange={onLevelChange} />
+          <StartButton gameTimeLeft={gameTimeLeft} gameDuration={gameDuration} onStart={startGame} />
+          {
+            (true || navigator.share !== undefined) && 
+            <ShareButton level={level ? level : 0} operation={operationKind} stars={totalScore}/>
+          }
+        </menu>
+      </header>
+      <CalcScreen
+        scoreToBeat={scoreToBeat}
+        operation={operation}
+        gameStarted={gameStarted}
+        gameDuration={gameDuration}
+        totalScore={totalScore}
+        newBestScoreMessage={newBestScoreMessage}
+        score={score}
+        level={level}
+        operationKind={operationKind}
+      />
+      <div className="keyboard-container">
+        <Keyboard
+          showResult={showResult}
+          result={operation ? operation.result : 0}
+          onKeyboardClick={onKeyboardValue} />
+      </div>
+    </div>
+  );
+}

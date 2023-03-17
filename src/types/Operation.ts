@@ -9,9 +9,18 @@ export default abstract class Operation {
 
   public abstract color: string;
 
-  //const searchParams = new URLSearchParams(document.location.search)
-  //rd = searchParams.get('seed')
-  public static prng = SR(Date.now().toString());
+  private static prng:any;
+
+  private static _seed:string;
+
+  public static set seed(sd: string) {
+    Operation._seed = sd
+    Operation.prng = SR(sd)
+  }
+
+  public static get seed():string {
+    return Operation._seed;
+  }
 
   constructor (level: number) {
     // loop until the generated digits generates

@@ -8,6 +8,7 @@ button.start-game {
   display: flex;
   width: 10vh;
   height: 10vh;
+
   span {
     border-radius: 50%;
     display:block;
@@ -17,5 +18,34 @@ button.start-game {
     margin: auto;
     background: $btn-bg;
     text-align: center;
+    transition: transform .2s ease-in-out;
+    &::after, &::before {
+      transform:inherit;
+    }
+  }
+
+  span:hover {
+    color:transparent;
+    position:relative;
+    transform:rotate(22.5deg);
+    &::after, &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 10%;
+      height: 60%;
+      margin-left: 45%;
+      margin-top: 20%;
+      display: block;
+      background-color: #FFF;
+      transform:inherit;
+    }
+    &::before {
+      width: 60%;
+      height: 10%;
+      margin-left: 20%;
+      margin-top: 45%;
+    }
   }
 }

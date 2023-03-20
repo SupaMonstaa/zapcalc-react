@@ -9,7 +9,7 @@ export default class Division extends Operation {
 
   protected generateDigits (): void {
     this.digit2 = Operation.rand(2, 21)
-    this.digit1 = this.digit2 * Operation.rand(1, 21)
+    this.digit1 = this.digit2 * Operation.rand(2, 21)
   }
 
   public get stars (): number {

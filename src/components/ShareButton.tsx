@@ -19,13 +19,13 @@ export const ShareButton:FunctionComponent<ShareButtonProps> = ({
 
   const handleShareButton = () => {
 
-    console.log('Try to share', location)
+    console.log('Try to share', window.location.href)
     // Check if navigator.share is supported by the browser
     if (navigator.share) {
       console.log("Congrats! Your browser supports Web Share API");
       navigator
         .share({
-          url: `${location}`
+          url: `${window.location.href}`
         })
         .then(() => {
           console.log("Sharing successfull");

@@ -15,12 +15,7 @@ import "./ZapCalcView.scss"
 let gameTimeout: ReturnType<typeof setTimeout> | undefined
 let nextOperation = true
 
-type ZapCalcViewProps = {
-  onChange:(level:number, operationKind:OperationKind, score:number, seed: string) => void
-}
-export const ZapCalcView:FunctionComponent<ZapCalcViewProps> = ({
-  onChange
-}) => {
+export const ZapCalcView:FunctionComponent = () => {
   const gameDuration = 120
   
   const [searchParams, setSearchParams] = useSearchParams();
@@ -62,7 +57,6 @@ export const ZapCalcView:FunctionComponent<ZapCalcViewProps> = ({
   
   useEffect(() => {
     console.log('use effect', level, operationKind, totalScore, seed)
-    onChange(level, operationKind, totalScore, seed)
     
     setSearchParams({
         level:level.toString(),
@@ -71,7 +65,7 @@ export const ZapCalcView:FunctionComponent<ZapCalcViewProps> = ({
         seed:seed
       }
     )
-  }, [setSearchParams, onChange, level, operationKind, totalScore, seed])
+  }, [setSearchParams, level, operationKind, totalScore, seed])
 
   const onKeyboardValue = (value: number): void => {
     console.log("nextOperation", nextOperation)

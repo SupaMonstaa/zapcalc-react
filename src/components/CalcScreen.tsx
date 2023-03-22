@@ -121,7 +121,7 @@ export class CalcScreen extends Component<CalcScreenProps, CalcScreenState> {
       this.drawText('PRESS', 69, 4, false, '#ff0000')
       this.drawText('START', 69, 16, false, '#ff0000')
     }
-    if (this.props.scoreToBeat >= 0) {
+    if (this.props.scoreToBeat > 0) {
       this.drawText('CHALLENGE !', 1, 1, false, '#ff0000')
       this.drawText(`Score to beat: ${this.props.scoreToBeat}`, 1, 10, false, '#ff0000')
     }

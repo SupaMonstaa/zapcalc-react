@@ -1,7 +1,6 @@
 import { FunctionComponent } from "react";
 import OperationKind from "@/types/OperationKind";
 import './ShareButton.scss';
-import { useLocation } from "react-router-dom";
 
 type ShareButtonProps = {
     operation: OperationKind,
@@ -15,17 +14,15 @@ export const ShareButton:FunctionComponent<ShareButtonProps> = ({
     stars
 }) => {
 
-  const location = useLocation();
-
   const handleShareButton = () => {
-
-    console.log('Try to share', window.location.href)
+    const url = window.location.href.replace('score=-1', 'score=0')
+    console.log('Try to share', url)
     // Check if navigator.share is supported by the browser
     if (navigator.share) {
       console.log("Congrats! Your browser supports Web Share API");
       navigator
         .share({
-          url: `${window.location.href}`
+          url: url
         })
         .then(() => {
           console.log("Sharing successfull");

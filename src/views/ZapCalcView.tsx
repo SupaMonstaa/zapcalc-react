@@ -15,8 +15,14 @@ import "./ZapCalcView.scss"
 let gameTimeout: ReturnType<typeof setTimeout> | undefined
 let nextOperation = true
 
-export const ZapCalcView:FunctionComponent = () => {
-  const gameDuration = 120
+type ZapCalcViewProps = {
+  onGameIsPlaying: (playing:boolean) => void
+}
+
+export const ZapCalcView:FunctionComponent<ZapCalcViewProps> = ({
+  onGameIsPlaying
+}) => {
+  const gameDuration = 10
   
   const [searchParams, setSearchParams] = useSearchParams();
   const qsSeed:string = searchParams.get('seed') || Date.now().toString()
@@ -27,6 +33,7 @@ export const ZapCalcView:FunctionComponent = () => {
     searchParams.get('seed') &&
     searchParams.get('score') ?
     parseInt(searchParams.get('score') as string) : -1;
+  console.log("ZapCalcView")
   const qsOperationKind = (searchParams.get('operation') || 
     localStorage.getItem('operationKind') ||
     OperationKind.mix
@@ -50,14 +57,17 @@ export const ZapCalcView:FunctionComponent = () => {
 
   // destroy timeout on unmount
   useEffect(() => {
+    console.log(`useEffect ${scoreToBeat}`)
+  }, [scoreToBeat])
+
+  // destroy timeout on unmount
+  useEffect(() => {
     return () => {
       clearTimeout(gameTimeout);
     }
   }, [])
   
-  useEffect(() => {
-    console.log('use effect', level, operationKind, totalScore, seed)
-    
+  useEffect(() => {  
     setSearchParams({
         level:level.toString(),
         operation: operationKind,
@@ -68,7 +78,6 @@ export const ZapCalcView:FunctionComponent = () => {
   }, [setSearchParams, level, operationKind, totalScore, seed])
 
   const onKeyboardValue = (value: number): void => {
-    console.log("nextOperation", nextOperation)
     if (!gameStarted || !operation) {
       return
     }
@@ -103,11 +112,16 @@ export const ZapCalcView:FunctionComponent = () => {
   }
 
   const startGame = () => {
+    console.log('startGame')
     // start a new game with a new seed if second try or restart a on going game
     const s =  scoreToBeat >= 0 && !gameStarted ? seed : Date.now().toString()  
-    setScoreToBeat(-1)
     setSeed(s)
     Operation.seed = s
+    if (score > 0 || gameStarted) {
+      // reset score to beat if a first game was started
+      // (else if first game, keep score to beat)
+      setScoreToBeat(-1)
+    }
     setScore(0)
     setShowResult(false)
     setTotalScore(-1)
@@ -119,15 +133,15 @@ export const ZapCalcView:FunctionComponent = () => {
   }
 
   const gameTick = useCallback(() => {
-    console.log("gameTick")
     if (gameStarted) {
       setGameTimeLeft(gameTimeLeft - 1)
     }
   }, [setGameTimeLeft, gameStarted,  gameTimeLeft])
 
   const endGame = useCallback(() => {
+    console.log(`endGame ${scoreToBeat}`)
     setGameStarted(false)
-    setGameTimeLeft(-1 )
+    setGameTimeLeft(-1)
     // send totalScore to screen
     setTotalScore(score)
     const [rank] = addScore(operationKind, level, totalScore)
@@ -154,6 +168,10 @@ export const ZapCalcView:FunctionComponent = () => {
       gameTimeout = setTimeout(gameTick, 1000)
     }
   }, [gameTimeLeft, endGame, gameTick, setSearchParams])
+
+  useEffect(() => {
+    onGameIsPlaying(gameStarted)
+  }, [gameStarted, onGameIsPlaying])
 
   const onLevelChange = (level: number) =>  {
     localStorage.setItem('level', `${level}`)

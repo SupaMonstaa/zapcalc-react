@@ -1,4 +1,4 @@
-import { ReactElement, useRef } from "react";
+import { FunctionComponent, ReactElement, useRef } from "react";
 import './KeyboardKey.scss';
 
 
@@ -9,23 +9,28 @@ type KeyboardKeyProps = {
     onClick:(value:number) => void
   }
 
-export function KeyboardKey(props:KeyboardKeyProps):ReactElement {
+export const KeyboardKey:FunctionComponent<KeyboardKeyProps> = ({
+    value,
+    correct,
+    showResult,
+    onClick
+}):ReactElement =>  {
     const buttonRef = useRef<HTMLButtonElement>(null)
     function handleClick(e:React.MouseEvent<HTMLElement>) {
         const btn = buttonRef.current as HTMLButtonElement
         e.preventDefault();
         btn.classList.add('active')
         setTimeout(() => {
-            props.onClick(props.value)
+            onClick(value)
             btn.classList.remove('active')
         }, 200)
       }
     function getButtonClass (): string {
-        const clss = Math.floor(props.value/10) % 2 ? 'odd' : 'even'
-        return `${clss} ${props.correct ? 'correct' : 'wrong'}${props.showResult ? ' show' : ''}`
+        const clss = Math.floor(value/10) % 2 ? 'odd' : 'even'
+        return `keyboard-key ${clss} ${correct ? 'correct' : 'wrong'}${showResult ? ' show' : ''}`
     }
     return (
-        <button ref={buttonRef} className={getButtonClass()} onClick={handleClick}>{ props.value }</button>
+        <button ref={buttonRef} className={getButtonClass()} onClick={handleClick}>{ value }</button>
     )
 }
 

@@ -33,7 +33,7 @@ export default abstract class Operation {
       this.stars > level)
   }
 
-  static rand (min: number, max: number): number {
+  public static rand (min: number, max: number): number {
     return Math.floor(min + Operation.prng() * (max - min))
   }
 

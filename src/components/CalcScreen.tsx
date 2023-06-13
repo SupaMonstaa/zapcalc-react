@@ -110,20 +110,32 @@ export class CalcScreen extends Component<CalcScreenProps, CalcScreenState> {
       return
     }
     this.clearScreen()
-    this.drawText('OPERATION', 2, 4)
+    this.drawText('OPERATION', 2, 5)
     const opLabel = OperationFactory.getLabel(this.props.operationKind as OperationKind)
-    this.drawText(opLabel, 46, 4)
+    this.drawText(opLabel, 46, 5)
     this.drawText('NIVEAU', 2, 16)
     for (let i = 1; i <= this.props.level; i += 1) {
       this.drawImage(this.starImage7, 25 + 8 * i, 15)
     }
     if (frame % 2) {
-      this.drawText('PRESS', 69, 4, false, '#ff0000')
-      this.drawText('START', 69, 16, false, '#ff0000')
-    }
-    if (this.props.scoreToBeat > 0) {
-      this.drawText('CHALLENGE !', 1, 1, false, '#ff0000')
-      this.drawText(`Score to beat: ${this.props.scoreToBeat}`, 1, 10, false, '#ff0000')
+      const stb = this.props.scoreToBeat
+      if (stb >= 0) {
+        // challenge mode
+        if (stb === 0) {
+          // score to beat is 0, don't display score to beat
+          this.drawText('START', 68, 5, false, '#ff0000')
+          this.drawText('CHALLENGE !', 59, 16, false, '#ff0000')
+        } else {
+          this.drawText('START', 68, 3, false, '#ff0000')
+          this.drawText('CHALLENGE !', 59, 11, false, '#ff0000')
+          const scoreIndent = (stb >= 10 ? 3 : 0) + (stb >= 100 ? 3 : 0)
+          this.drawText(`${stb}`, 73 - scoreIndent, 19, false, '#ff0000')
+          this.drawImage(this.starImage7, 73 + scoreIndent + 5, 19)
+        }
+      } else {
+        this.drawText('PRESS', 69, 4, false, '#ff0000')
+        this.drawText('START', 69, 16, false, '#ff0000')
+      }
     }
     this.pixelate()
   }
@@ -151,9 +163,21 @@ export class CalcScreen extends Component<CalcScreenProps, CalcScreenState> {
       if (big) {
         this.drawImage(this.starImage19, 43 + 0.5 * lg, 4)
       } else {
-        this.drawImage(this.starImage9, 46 + 0.5 * lg, 8)
+        this.drawImage(this.starImage9, 47 + 0.5 * lg, 9)
       }
       this.drawText(this.props.newBestScoreMessage, 1, 2, false, '#000000')
+
+      console.log(this.props.scoreToBeat)
+      if (this.props.scoreToBeat > 0) {
+        if (this.props.score > this.props.scoreToBeat) {
+          this.drawText("YOU WON !", 76, 9, false, '#000000')
+        } else if (this.props.score === this.props.scoreToBeat) {
+          this.drawText("DRAW", 76, 9, false, '#000000')
+        } else {
+          this.drawText("YOU LOSE !", 76, 9, false, '#000000')
+        }
+      }
+
       this.pixelate()
     }
   }

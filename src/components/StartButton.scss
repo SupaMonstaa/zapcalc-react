@@ -24,28 +24,31 @@ button.start-game {
     }
   }
 
-  span:hover {
-    color:transparent;
-    position:relative;
-    transform:rotate(22.5deg);
-    &::after, &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 10%;
-      height: 60%;
-      margin-left: 45%;
-      margin-top: 20%;
-      display: block;
-      background-color: #FFF;
-      transform:inherit;
-    }
-    &::before {
-      width: 60%;
-      height: 10%;
-      margin-left: 20%;
-      margin-top: 45%;
+  /* cross only for devices with fine pointer */
+  @media(hover: hover) and (pointer: fine) {
+    span:hover {
+      color:transparent;
+      position:relative;
+      transform:rotate(22.5deg);
+      &::after, &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 10%;
+        height: 60%;
+        margin-left: 45%;
+        margin-top: 20%;
+        display: block;
+        background-color: #FFF;
+        transform:inherit;
+      }
+      &::before {
+        width: 60%;
+        height: 10%;
+        margin-left: 20%;
+        margin-top: 45%;
+      }
     }
   }
 }
